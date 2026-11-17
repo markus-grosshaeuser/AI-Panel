@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ai-panel
+      SPRING_DATA_MONGODB_URI: mongodb://root:root_password@mongodb:27017/ai-panel?authSource=admin
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - ai-panel_network
