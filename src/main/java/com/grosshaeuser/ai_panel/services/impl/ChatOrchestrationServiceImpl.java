@@ -28,7 +28,7 @@ public class ChatOrchestrationServiceImpl implements ChatOrchestrationService {
 
     @Override
     public String orchestrateChat(Agent agent, String sessionId, String userContent) {
-        ChatSession session = fetchOrCreateSession(sessionId);
+        ChatSession session = fetchOrCreateSession(sessionId, agent.getUser().getId());
         Prompt prompt = new Prompt(conversationMessages(agent, session, userContent));
         AssistantMessage assistantResponse = chatModel.call(prompt).getResults().getFirst().getOutput();
         updateSession(session, userContent, assistantResponse.getText());
@@ -38,7 +38,7 @@ public class ChatOrchestrationServiceImpl implements ChatOrchestrationService {
     @Override
     public Flux<String> streamChat(Agent agent, String sessionId, String userContent) {
         return Flux.defer(() -> {
-            ChatSession session = fetchOrCreateSession(sessionId);
+            ChatSession session = fetchOrCreateSession(sessionId, agent.getUser().getId());
             Prompt prompt = new Prompt(conversationMessages(agent, session, userContent));
             StringBuilder reply = new StringBuilder();
             return chatModel.stream(prompt)
@@ -57,12 +57,12 @@ public class ChatOrchestrationServiceImpl implements ChatOrchestrationService {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    private ChatSession fetchOrCreateSession(String sessionId) {
+    private ChatSession fetchOrCreateSession(String sessionId, Long userId) {
         return chatSessionRepository.findById(sessionId)
                 .orElseGet(() -> {
                     ChatSession newSession = ChatSession.builder()
                             .id(sessionId)
-                            .userId("default-user") // Placeholder for now
+                            .userId(userId)
                             .createdAt(LocalDateTime.now())
                             .updatedAt(LocalDateTime.now())
                             .messages(new ArrayList<>())
