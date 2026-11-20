@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface AgentSessionRepository extends JpaRepository<AgentSession, Long> {
-    List<AgentSession> findByAgentId(Long agentId);
+    List<AgentSession> findByAgentIdAndAgentUserId(Long agentId, Long userId);
 
     Optional<AgentSession> findBySessionId(String sessionId);
 
